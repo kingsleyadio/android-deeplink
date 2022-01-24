@@ -9,85 +9,85 @@ class BaseRouteTest {
 
     @Test
     fun matchWith_pathVariations() {
-        var uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes")
+        var uri = DeepLinkUri.parse("http://www.example.com/recipes")
         assertTrue(TestRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/")
+        uri = DeepLinkUri.parse("http://www.example.com/recipes/")
         assertTrue(TestRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/x")
+        uri = DeepLinkUri.parse("http://www.example.com/recipes/x")
         assertFalse(TestRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipe/1234")
+        uri = DeepLinkUri.parse("http://www.example.com/recipe/1234")
         assertTrue(TestRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipe/")
+        uri = DeepLinkUri.parse("http://www.example.com/recipe/")
         assertFalse(TestRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("hellofresh://host/recipes")
+        uri = DeepLinkUri.parse("example://host/recipes")
         assertTrue(TestRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("hellofresh://host/recipes/")
+        uri = DeepLinkUri.parse("example://host/recipes/")
         assertTrue(TestRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("hellofresh://host/recipes/x")
+        uri = DeepLinkUri.parse("example://host/recipes/x")
         assertFalse(TestRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("hellofresh://host/recipe/1234")
+        uri = DeepLinkUri.parse("example://host/recipe/1234")
         assertTrue(TestRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("hellofresh://host/recipe/")
+        uri = DeepLinkUri.parse("example://host/recipe/")
         assertFalse(TestRoute.matchWith(uri).isMatch)
     }
 
     @Test
     fun matchWith_pathVariationsWithOverride() {
-        var uri = DeepLinkUri.parse("hellofresh://recipes")
+        var uri = DeepLinkUri.parse("example://recipes")
         assertTrue(PathOverrideRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("hellofresh://recipes/")
+        uri = DeepLinkUri.parse("example://recipes/")
         assertTrue(PathOverrideRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("hellofresh://recipes/x")
+        uri = DeepLinkUri.parse("example://recipes/x")
         assertFalse(PathOverrideRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("hellofresh://recipe/1234")
+        uri = DeepLinkUri.parse("example://recipe/1234")
         assertTrue(PathOverrideRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("hellofresh://recipe/")
+        uri = DeepLinkUri.parse("example://recipe/")
         assertFalse(PathOverrideRoute.matchWith(uri).isMatch)
     }
 
     @Test
     fun matchWith_pathVariationsWithNamelessParameter() {
-        var uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/x/1234")
+        var uri = DeepLinkUri.parse("http://www.example.com/recipes/x/1234")
         assertTrue(NamelessPathRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes//1234")
+        uri = DeepLinkUri.parse("http://www.example.com/recipes//1234")
         assertTrue(NamelessPathRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/")
+        uri = DeepLinkUri.parse("http://www.example.com/recipes/")
         assertFalse(NamelessPathRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes//")
+        uri = DeepLinkUri.parse("http://www.example.com/recipes//")
         assertFalse(NamelessPathRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipe/x")
+        uri = DeepLinkUri.parse("http://www.example.com/recipe/x")
         assertTrue(NamelessPathRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipe/1234")
+        uri = DeepLinkUri.parse("http://www.example.com/recipe/1234")
         assertTrue(NamelessPathRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipe/")
+        uri = DeepLinkUri.parse("http://www.example.com/recipe/")
         assertFalse(NamelessPathRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipe")
+        uri = DeepLinkUri.parse("http://www.example.com/recipe")
         assertFalse(NamelessPathRoute.matchWith(uri).isMatch)
     }
 
     @Test
     fun matchWith_InputWithOnlyPathParams_ReturnsPathData() {
-        val uri = DeepLinkUri.parse("http://www.hellofresh.com/recipe/1234")
+        val uri = DeepLinkUri.parse("http://www.example.com/recipe/1234")
         val params = TestRoute.matchWith(uri).params
 
         assertEquals(1, params.size)
@@ -96,66 +96,66 @@ class BaseRouteTest {
 
     @Test
     fun matchWith_DefaultPathResolution() {
-        val uri = DeepLinkUri.parse("http://www.hellofresh.com/recipe/1234")
+        val uri = DeepLinkUri.parse("http://www.example.com/recipe/1234")
         assertTrue(TestRoute.matchWith(uri).isMatch)
 
-        val customUriWithHost = DeepLinkUri.parse("hellofresh://host/recipe/1234")
+        val customUriWithHost = DeepLinkUri.parse("example://host/recipe/1234")
         assertTrue(TestRoute.matchWith(customUriWithHost).isMatch)
 
-        val customUriNoHost = DeepLinkUri.parse("hellofresh://recipe/1234")
+        val customUriNoHost = DeepLinkUri.parse("example://recipe/1234")
         assertFalse(TestRoute.matchWith(customUriNoHost).isMatch)
     }
 
     @Test
     fun matchWith_OverridePathResolution() {
-        val uri = DeepLinkUri.parse("http://www.hellofresh.com/recipe/1234")
+        val uri = DeepLinkUri.parse("http://www.example.com/recipe/1234")
         assertTrue(PathOverrideRoute.matchWith(uri).isMatch)
 
-        val customUriWithHost = DeepLinkUri.parse("hellofresh://host/recipe/1234")
+        val customUriWithHost = DeepLinkUri.parse("example://host/recipe/1234")
         assertFalse(PathOverrideRoute.matchWith(customUriWithHost).isMatch)
 
-        val customUriNoHost = DeepLinkUri.parse("hellofresh://recipe/1234")
+        val customUriNoHost = DeepLinkUri.parse("example://recipe/1234")
         assertTrue(PathOverrideRoute.matchWith(customUriNoHost).isMatch)
     }
 
     @Test
     fun matchWith_namelessPathResolution() {
-        var uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/me/1234")
+        var uri = DeepLinkUri.parse("http://www.example.com/recipes/me/1234")
         assertTrue(NamelessPathRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/customer-key/1234")
+        uri = DeepLinkUri.parse("http://www.example.com/recipes/customer-key/1234")
         assertTrue(NamelessPathRoute.matchWith(uri).isMatch)
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/anything/1234")
+        uri = DeepLinkUri.parse("http://www.example.com/recipes/anything/1234")
         assertTrue(NamelessPathRoute.matchWith(uri).isMatch)
     }
 
     @Test
     fun matchWith_regexPathResolution() {
-        var uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/detail/abc-1234")
+        var uri = DeepLinkUri.parse("http://www.example.com/recipes/detail/abc-1234")
         var res = RegexPathRoute.matchWith(uri)
         assertTrue(res.isMatch)
         assertEquals("detail", res.params["action"])
         assertEquals("abc-1234", res.params["id"])
 
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/info/abc-1234")
+        uri = DeepLinkUri.parse("http://www.example.com/recipes/info/abc-1234")
         res = RegexPathRoute.matchWith(uri)
         assertTrue(res.isMatch)
         assertEquals("info", res.params["action"])
         assertEquals("abc-1234", res.params["id"])
 
         // action does not match
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/invalid/abc-1234")
+        uri = DeepLinkUri.parse("http://www.example.com/recipes/invalid/abc-1234")
         assertFalse(RegexPathRoute.matchWith(uri).isMatch)
 
         // id does not match
-        uri = DeepLinkUri.parse("http://www.hellofresh.com/recipes/detail/1234")
+        uri = DeepLinkUri.parse("http://www.example.com/recipes/detail/1234")
         assertFalse(RegexPathRoute.matchWith(uri).isMatch)
     }
 
     @Test
     fun matchWith_regexPathResolutionUnnamed() {
-        val uri = DeepLinkUri.parse("http://www.hellofresh.com/recipe/abc-1234")
+        val uri = DeepLinkUri.parse("http://www.example.com/recipe/abc-1234")
         val res = UnnamedRegexPathRoute.matchWith(uri)
         assertTrue(res.isMatch)
         assertTrue(res.params.isEmpty())
@@ -171,7 +171,7 @@ class BaseRouteTest {
         override fun run(uri: DeepLinkUri, params: Map<String, String>, env: Environment) = Unit
 
         override fun treatHostAsPath(uri: DeepLinkUri): Boolean {
-            return uri.scheme() == "hellofresh"
+            return uri.scheme() == "example"
         }
     }
 

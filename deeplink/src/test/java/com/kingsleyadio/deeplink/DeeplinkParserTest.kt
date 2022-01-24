@@ -34,7 +34,7 @@ class DeepLinkParserTest {
 
     @Test
     fun parseWithNextRouter() {
-        assertEquals("SubscriptionRoute", parser.parse(DeepLinkUri.parse("hellofresh://host/subscription")))
+        assertEquals("SubscriptionRoute", parser.parse(DeepLinkUri.parse("example://host/subscription")))
     }
 
     @Test

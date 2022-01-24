@@ -9,7 +9,7 @@ class DeepLinkUriKtTest {
 
     @Test
     fun get() {
-        val androidUri = Uri.parse("http://www.hellofresh.com/test")
+        val androidUri = Uri.parse("http://www.example.com/test")
         val deepUri = DeepLinkUri.get(androidUri)
 
         assertEquals(androidUri.toString(), deepUri.toString())
