@@ -1,6 +1,6 @@
 [versions]
 jacoco = "0.8.7"
-kotlin = "1.6.10"
+kotlin = "1.5.31"
 
 [libraries]
 agp = "com.android.tools.build:gradle:7.0.4"
