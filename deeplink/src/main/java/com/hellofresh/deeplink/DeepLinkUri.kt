@@ -18,20 +18,9 @@
 
 package com.hellofresh.deeplink
 
-import com.hellofresh.deeplink.DeepLinkUri.Builder.ParseResult
 import okio.Buffer
-import java.net.IDN
-import java.net.InetAddress
-import java.net.MalformedURLException
-import java.net.URI
-import java.net.URISyntaxException
-import java.net.URL
-import java.net.UnknownHostException
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.Collections
-import java.util.LinkedHashSet
-import java.util.Locale
+import java.net.*
+import java.util.*
 
 /**
  * Adapted from OkHttp's HttpUrl class.
@@ -353,7 +342,7 @@ class DeepLinkUri private constructor(builder: Builder) {
         }
 
         fun scheme(scheme: String): Builder = apply {
-            this.scheme = scheme.toLowerCase(Locale.US)
+            this.scheme = scheme.lowercase(Locale.US)
         }
 
         fun username(username: String): Builder = apply {
@@ -717,9 +706,9 @@ class DeepLinkUri private constructor(builder: Builder) {
                 result.append("//")
             }
 
-            if (!encodedUsername.isEmpty() || !encodedPassword.isEmpty()) {
+            if (encodedUsername.isNotEmpty() || encodedPassword.isNotEmpty()) {
                 result.append(encodedUsername)
-                if (!encodedPassword.isEmpty()) {
+                if (encodedPassword.isNotEmpty()) {
                     result.append(':')
                     result.append(encodedPassword)
                 }
@@ -1008,7 +997,7 @@ class DeepLinkUri private constructor(builder: Builder) {
             val removed = encodedPathSegments.removeAt(encodedPathSegments.size - 1)
 
             // Make sure the path ends with a '/' by either adding an empty string or clearing a segment.
-            if (removed.isEmpty() && !encodedPathSegments.isEmpty()) {
+            if (removed.isEmpty() && encodedPathSegments.isNotEmpty()) {
                 encodedPathSegments[encodedPathSegments.size - 1] = ""
             } else {
                 encodedPathSegments.add("")
@@ -1225,7 +1214,7 @@ class DeepLinkUri private constructor(builder: Builder) {
                     val c = input[i]
                     if (c < '0' || c > '9') break
                     if (value == 0 && groupOffset != i) return false // Reject unnecessary leading '0's.
-                    value = value * 10 + c.toInt() - '0'.toInt()
+                    value = value * 10 + c.code - '0'.code
                     if (value > 255) return false // Value out of range.
                     i++
                 }
@@ -1248,7 +1237,7 @@ class DeepLinkUri private constructor(builder: Builder) {
          */
         private fun domainToAscii(input: String): String? {
             try {
-                val result = IDN.toASCII(input).toLowerCase(Locale.US)
+                val result = IDN.toASCII(input).lowercase(Locale.US)
                 if (result.isEmpty()) return null
 
                 // Confirm that the IDN ToASCII result doesn't contain any illegal characters.
@@ -1263,18 +1252,17 @@ class DeepLinkUri private constructor(builder: Builder) {
         }
 
         private fun containsInvalidHostnameAsciiCodes(hostnameAscii: String): Boolean {
-            for (i in 0 until hostnameAscii.length) {
-                val c = hostnameAscii[i]
+            for (element in hostnameAscii) {
                 // The WHATWG Host parsing rules accepts some character codes which are invalid by
                 // definition for OkHttp's host header checks (and the WHATWG Host syntax definition). Here
                 // we rule out characters that would cause problems in host headers.
-                if (c <= '\u001f' || c >= '\u007f') {
+                if (element <= '\u001f' || element >= '\u007f') {
                     return true
                 }
                 // Check for the characters mentioned in the WHATWG Host parsing spec:
                 // U+0000, U+0009, U+000A, U+000D, U+0020, "#", "%", "/", ":", "?", "@", "[", "\", and "]"
                 // (excluding the characters covered above).
-                if (" #%/:?@[\\]".indexOf(c) != -1) {
+                if (" #%/:?@[\\]".indexOf(element) != -1) {
                     return true
                 }
             }
@@ -1308,11 +1296,11 @@ class DeepLinkUri private constructor(builder: Builder) {
             var i = 0
             while (i < address.size) {
                 if (i == longestRunOffset) {
-                    result.writeByte(':'.toInt())
+                    result.writeByte(':'.code)
                     i += longestRunLength
-                    if (i == 16) result.writeByte(':'.toInt())
+                    if (i == 16) result.writeByte(':'.code)
                 } else {
-                    if (i > 0) result.writeByte(':'.toInt())
+                    if (i > 0) result.writeByte(':'.code)
                     val group = ((address[i].toInt() and 0xff) shl 8) or (address[i + 1].toInt() and 0xff)
                     result.writeHexadecimalUnsignedLong(group.toLong())
                     i += 2
@@ -1430,9 +1418,8 @@ class DeepLinkUri private constructor(builder: Builder) {
         @JvmStatic
         fun parse(uri: String): DeepLinkUri {
             val builder = Builder()
-            val result = builder.parse(null, uri)
-            return when (result) {
-                ParseResult.SUCCESS -> builder.build()
+            return when (val result = builder.parse(null, uri)) {
+                Builder.ParseResult.SUCCESS -> builder.build()
                 else -> throw IllegalArgumentException("Invalid URL: $result for $uri")
             }
         }
@@ -1445,7 +1432,7 @@ class DeepLinkUri private constructor(builder: Builder) {
         fun parseOrNull(uri: String): DeepLinkUri? {
             val builder = Builder()
             val result = builder.parse(null, uri)
-            return if (result == ParseResult.SUCCESS) builder.build() else null
+            return if (result == Builder.ParseResult.SUCCESS) builder.build() else null
         }
 
         /**
@@ -1505,7 +1492,7 @@ class DeepLinkUri private constructor(builder: Builder) {
             var i = pos
             while (i < limit) {
                 codePoint = encoded.codePointAt(i)
-                if (codePoint == '%'.toInt() && i + 2 < limit) {
+                if (codePoint == '%'.code && i + 2 < limit) {
                     val d1 = decodeHexDigit(encoded[i + 1])
                     val d2 = decodeHexDigit(encoded[i + 2])
                     if (d1 != -1 && d2 != -1) {
@@ -1514,8 +1501,8 @@ class DeepLinkUri private constructor(builder: Builder) {
                         i += Character.charCount(codePoint)
                         continue
                     }
-                } else if (codePoint == '+'.toInt() && plusIsSpace) {
-                    out.writeByte(' '.toInt())
+                } else if (codePoint == '+'.code && plusIsSpace) {
+                    out.writeByte(' '.code)
                     i += Character.charCount(codePoint)
                     continue
                 }
@@ -1568,8 +1555,8 @@ class DeepLinkUri private constructor(builder: Builder) {
                     || codePoint == 0x7f
                     || codePoint >= 0x80 && asciiOnly
                     || encodeSet.indexOf(codePoint.toChar()) != -1
-                    || codePoint == '%'.toInt() &&  (!alreadyEncoded || strict && !percentEncoded(input, i, limit))
-                    || codePoint == '+'.toInt() && plusIsSpace
+                    || codePoint == '%'.code &&  (!alreadyEncoded || strict && !percentEncoded(input, i, limit))
+                    || codePoint == '+'.code && plusIsSpace
                 ) {
                     // Slow path: the character at i requires encoding!
                     val out = Buffer()
@@ -1593,16 +1580,16 @@ class DeepLinkUri private constructor(builder: Builder) {
             var i = pos
             while (i < limit) {
                 codePoint = input.codePointAt(i)
-                if (alreadyEncoded && (codePoint == '\t'.toInt() || codePoint == '\n'.toInt() || codePoint == '\u000c'.toInt() || codePoint == '\r'.toInt())) {
+                if (alreadyEncoded && (codePoint == '\t'.code || codePoint == '\n'.code || codePoint == '\u000c'.code || codePoint == '\r'.code)) {
                     // Skip this character.
-                } else if (codePoint == '+'.toInt() && plusIsSpace) {
+                } else if (codePoint == '+'.code && plusIsSpace) {
                     // Encode '+' as '%2B' since we permit ' ' to be encoded as either '+' or '%20'.
                     out.writeUtf8(if (alreadyEncoded) "+" else "%2B")
                 } else if (codePoint < 0x20
                     || codePoint == 0x7f
                     || codePoint >= 0x80 && asciiOnly
                     || encodeSet.indexOf(codePoint.toChar()) != -1
-                    || codePoint == '%'.toInt() &&  (!alreadyEncoded || strict && !percentEncoded(input, i, limit))
+                    || codePoint == '%'.code &&  (!alreadyEncoded || strict && !percentEncoded(input, i, limit))
                 ) {
                     // Percent encode this character.
                     if (utf8Buffer == null) {
@@ -1611,9 +1598,9 @@ class DeepLinkUri private constructor(builder: Builder) {
                     utf8Buffer.writeUtf8CodePoint(codePoint)
                     while (!utf8Buffer.exhausted()) {
                         val b = utf8Buffer.readByte().toInt() and 0xff
-                        out.writeByte('%'.toInt())
-                        out.writeByte(HEX_DIGITS[b shr 4 and 0xf].toInt())
-                        out.writeByte(HEX_DIGITS[b and 0xf].toInt())
+                        out.writeByte('%'.code)
+                        out.writeByte(HEX_DIGITS[b shr 4 and 0xf].code)
+                        out.writeByte(HEX_DIGITS[b and 0xf].code)
                     }
                 } else {
                     // This character doesn't need encoding. Just copy it over.
