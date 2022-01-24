@@ -67,6 +67,12 @@ subprojects {
                 description.set("Deeplink processing library")
                 url.set("https://github.com/kingsleyadio/android-deeplink")
 
+                scm {
+                    url.set("https://github.com/kingsleyadio/android-deeplink")
+                    connection.set("scm:git:git://github.com/kingsleyadio/android-deeplink.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/kingsleyadio/android-deeplink.git")
+                }
+
                 licenses {
                     license {
                         name.set("The Apache Software License, Version 2.0")
