@@ -1,8 +1,4 @@
-import groovy.lang.GroovyObject
-import org.gradle.api.publish.maven.MavenPom
-import org.jetbrains.dokka.gradle.DokkaTask
-import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
-import org.jfrog.gradle.plugin.artifactory.dsl.ResolverConfig
+@file:Suppress("PropertyName")
 
 /*
  * Copyright (c) 2019.  The HelloFresh Android Team
@@ -22,131 +18,39 @@ import org.jfrog.gradle.plugin.artifactory.dsl.ResolverConfig
 
 plugins {
     id("com.android.library")
-    id("kotlin-android")
-    id("maven-publish")
-    id("com.jfrog.bintray") version Versions.bintrayGradlePlugin
-    id("org.jetbrains.dokka-android") version Versions.dokkaAndroid
-    id("com.jfrog.artifactory") version Versions.jfrogArtifactory
+    kotlin("android")
+    id("de.mobilej.unmock")
+    id("org.jetbrains.dokka")
+    id("com.vanniktech.maven.publish.base")
 }
 
 android {
-    compileSdkVersion(Android.sdk)
+    compileSdk = 30
     defaultConfig {
-        minSdkVersion(Android.minSdk)
-        targetSdkVersion(Android.sdk)
-        versionName = Project.version
-        setProperty("archivesBaseName", "${Project.name}-${Project.version}")
-        testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
+        minSdk = 17
+        targetSdk = 30
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 }
-
-group = Project.groupId
-version = Project.version
 
 dependencies {
-    implementation(Dependencies.kotlinStdLib)
-    implementation(Dependencies.okio)
-    testImplementation(DependenciesTest.junit)
-    testImplementation(DependenciesTest.kotlinTest)
-    testImplementation(DependenciesTest.kotlinTestJunit)
-    androidTestImplementation(DependenciesTest.junit)
-    androidTestImplementation(DependenciesTest.kotlinTest)
-    androidTestImplementation(DependenciesTest.kotlinTestJunit)
-    androidTestImplementation(DependenciesTest.supportTestRunner)
+    implementation(libs.kotlinStdlib)
+    implementation(libs.okio)
+
+    unmock(libs.robolectricAndroid)
+    testImplementation(libs.kotlinTestJunit)
 }
 
-val artifact = "$buildDir/outputs/aar/${Project.name}-${Project.version}-release.aar"
-
-val sourcesJar by tasks.creating(Jar::class) {
-    classifier = "sources"
-    from(android.sourceSets.getByName("main").java.srcDirs)
+unMock {
+    keep("android.net.Uri")
+    keepStartingWith("libcore.")
+    keepAndRename("java.nio.charset.Charsets").to("xjava.nio.charset.Charsets")
 }
 
-val dokka by tasks.getting(DokkaTask::class) {
-    outputFormat = "html"
-    outputDirectory = "$buildDir/javadoc"
-}
-
-val dokkaJar by tasks.creating(Jar::class) {
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-    description = "Assembles Kotlin docs with Dokka"
-    classifier = "javadoc"
-    from(dokka)
-}
-
-artifacts {
-    archives(sourcesJar)
-    archives(dokkaJar)
-}
-
-
-publishing {
-
-    publications {
-        register(Project.artifactId, MavenPublication::class) {
-            groupId = Project.groupId
-            artifactId = Project.artifactId
-            version = Project.version
-            artifact(artifact)
-            artifact(sourcesJar)
-            artifact(dokkaJar)
-            pom.addDependencies()
-        }
-    }
-}
-
-bintray {
-    user = System.getenv("BINTRAY_USER") ?: ""
-    key = System.getenv("BINTRAY_API_KEY") ?: ""
-    publish = true
-    setPublications(Project.artifactId)
-    with(pkg) {
-        repo = "maven"
-        name = Project.name
-        websiteUrl = "https://github.com/hellofresh/android-deeplink/"
-        githubRepo = "hellofresh/android-deeplink"
-        vcsUrl = "https://github.com/hellofresh/android-deeplink/"
-        description = "Deeplink parser library"
-        desc = description
-        publish = true
-        githubRepo = "hellofresh/android-deeplink"
-        githubReleaseNotesFile = "../CHANGELOG.md"
-        with(version) {
-            name = Project.version
-        }
-        setLabels("kotlin", "Android", "Deep link")
-        setLicenses("Apache-2.0")
-    }
-}
-
-fun MavenPom.addDependencies() = withXml {
-    asNode().appendNode("dependencies").let { depNode ->
-        configurations.compile.allDependencies.forEach {
-            depNode.appendNode("dependency").apply {
-                appendNode("groupId", it.group)
-                appendNode("artifactId", it.name)
-                appendNode("version", it.version)
-            }
-        }
-    }
-}
-
-artifactory {
-    setContextUrl("https://oss.jfrog.org")
-    publish(delegateClosureOf<PublisherConfig> {
-        repository(delegateClosureOf<GroovyObject> {
-            val repoKey = if (Project.version.endsWith("SNAPSHOT")) "oss-snapshot-local" else "oss-release-local"
-            setProperty("repoKey", repoKey)
-            setProperty("username", System.getenv("BINTRAY_USER") ?: "")
-            setProperty("password", System.getenv("BINTRAY_API_KEY") ?: "")
-            setProperty("maven", true)
-        })
-        defaults(delegateClosureOf<GroovyObject> {
-            invokeMethod("publications", Project.artifactId)
-        })
-
-        resolve(delegateClosureOf<ResolverConfig> {
-            setProperty("repoKey", "jcenter")
-        })
-    })
+mavenPublishing {
+    configure(
+        com.vanniktech.maven.publish.AndroidLibrary(
+            com.vanniktech.maven.publish.JavadocJar.Dokka("dokkaJavadoc")
+        )
+    )
 }
