@@ -1,4 +1,4 @@
-package com.hellofresh.deeplink
+package com.kingsleyadio.deeplink
 
 class DeepLinkParser<T>(
     private val environment: Environment,

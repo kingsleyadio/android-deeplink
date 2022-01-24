@@ -1,4 +1,4 @@
-package com.hellofresh.deeplink
+package com.kingsleyadio.deeplink
 
 
 object RecipeRoute : BaseRoute<String>("recipes", "recipe/:id") {

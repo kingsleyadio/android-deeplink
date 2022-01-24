@@ -1,4 +1,4 @@
-package com.hellofresh.deeplink
+package com.kingsleyadio.deeplink
 
 import java.util.regex.Pattern
 

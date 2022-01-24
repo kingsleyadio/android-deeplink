@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hellofresh.deeplink
+package com.kingsleyadio.deeplink
 
 import org.junit.Ignore
 import org.junit.Test
@@ -21,8 +21,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.net.URI
 import java.net.URL
-import java.util.Arrays
-import java.util.LinkedHashSet
+import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull

@@ -1,6 +1,6 @@
 @file:Suppress("unused", "MemberVisibilityCanBePrivate")
 
-package com.hellofresh.deeplink
+package com.kingsleyadio.deeplink
 
 import okio.Buffer
 import java.net.*

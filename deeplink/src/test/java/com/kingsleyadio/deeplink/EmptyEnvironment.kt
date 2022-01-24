@@ -1,4 +1,4 @@
-package com.hellofresh.deeplink
+package com.kingsleyadio.deeplink
 
 import android.content.Context
 

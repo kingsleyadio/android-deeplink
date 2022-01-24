@@ -1,4 +1,4 @@
-package com.hellofresh.deeplink
+package com.kingsleyadio.deeplink
 
 import org.junit.Test
 import kotlin.test.assertEquals

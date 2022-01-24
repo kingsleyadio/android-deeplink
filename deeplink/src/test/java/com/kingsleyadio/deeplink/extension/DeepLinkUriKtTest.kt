@@ -1,7 +1,7 @@
-package com.hellofresh.deeplink.extension
+package com.kingsleyadio.deeplink.extension
 
 import android.net.Uri
-import com.hellofresh.deeplink.DeepLinkUri
+import com.kingsleyadio.deeplink.DeepLinkUri
 import org.junit.Test
 import kotlin.test.assertEquals
 
