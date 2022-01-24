@@ -154,6 +154,18 @@ class BaseRouteTest {
     }
 
     @Test
+    fun matchWith_regexPathResolution_equalNamedPaths() {
+        var uri = DeepLinkUri.parse("http://www.example.com/recipes/1234/1234")
+        var res = EqualNamedPathRoute.matchWith(uri)
+        assertTrue(res.isMatch)
+        assertEquals(1, res.params.size)
+
+        uri = DeepLinkUri.parse("http://www.example.com/recipes/1234/5678")
+        res = EqualNamedPathRoute.matchWith(uri)
+        assertFalse(res.isMatch)
+    }
+
+    @Test
     fun matchWith_regexPathResolutionUnnamed() {
         val uri = DeepLinkUri.parse("http://www.example.com/recipe/abc-1234")
         val res = UnnamedRegexPathRoute.matchWith(uri)
@@ -186,6 +198,11 @@ class BaseRouteTest {
     }
 
     object UnnamedRegexPathRoute : BaseRoute<Unit>("recipe/:(.*-\\w+)") {
+
+        override fun run(uri: DeepLinkUri, params: Map<String, String>, env: Environment) = Unit
+    }
+
+    object EqualNamedPathRoute : BaseRoute<Unit>("recipes/:id(\\w{4})/:id") {
 
         override fun run(uri: DeepLinkUri, params: Map<String, String>, env: Environment) = Unit
     }

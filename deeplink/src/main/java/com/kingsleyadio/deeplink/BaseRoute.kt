@@ -17,8 +17,9 @@ abstract class BaseRoute<out T>(private vararg val routes: String) : Action<T> {
                 when {
                     routePart.startsWith(":") -> {
                         val (key, value) = resolveParameterizedPath(routePart, inPart) ?: return@forEach
-                        val parameterKey = key.takeUnless { it.isEmpty() } ?: return@zip
-                        params[parameterKey] = value
+                        key.ifEmpty { return@zip }
+                        if (key in params && params[key] != value) return@forEach
+                        else params[key] = value
                     }
                     routePart == "*" -> return@zip
                     routePart != inPart -> return@forEach
