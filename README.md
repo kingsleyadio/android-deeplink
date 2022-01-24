@@ -8,39 +8,57 @@ Deeplink parser library
 This section describes the approach taken by the parser to resolve the handler that processes a deep link.
 
 A parser is instantiated with a set of Routes and a fallback Action.
-The parser goes through these routes (in the order of registration) until it finds one that is able to handle the link.
-The order is important in a case where multiple routes can handle the same deep link. In such cases, the first match is ALWAYS selected.  
-The fallback action gets executed if there are no registered routes, or if non of the registered routes are able to handle the deep link.
+The parser goes through these routes (in the order of registration) until it finds one that 
+is able to handle the link.
+The order is important in a case where multiple routes can handle the same deep link. 
+In such cases, the first match is ALWAYS selected.  
+The fallback action gets executed if there are no registered routes, or if non of the registered routes 
+are able to handle the deep link.
 
 
-Each route reports whether or not it's able to handle a link to the parser. The report also contains a map of key/value pairs that will be discussed in the path matching sub-section.
-Once a suitable handler is found, the parser then forwards the URI and the key/value map back to the handler for actual processing.  
+Each route reports whether or not it's able to handle a link to the parser. The report also contains a 
+map of key/value pairs that will be discussed in the path matching sub-section.
+Once a suitable handler is found, the parser then forwards the URI and the key/value map back 
+to the handler for actual processing.  
 The output of this is then returned as the final result of the parse request.
 
 The logic to determine whether/not a route can handle a link is described below
 
 ### Path matching
-A Route is made up of an array of route patterns. The deep link will be tested against each of these patterns to determine whether/not the Route can handle the link.  
-If a match is found, we return immediately, otherwise, we test the link against all patterns, and fallback to NO-MATCH if none of them matches the link.
+A Route is made up of an array of route patterns. The deep link will be tested against each of these 
+patterns to determine whether/not the Route can handle the link.  
+If a match is found, we return immediately, otherwise, we test the link against all patterns, and 
+fallback to NO-MATCH if none of them matches the link.
 
-A route pattern is a string representing the path segments of a deep link URI. The pattern is broken down into its constituent parts/segments and each part is tested against the corresponding part of the deep link path segments.  
-We take a fast path by immediately returning a NO-MATCH if the size of the pattern segments is not the same as that of the URI path segments.
+A route pattern is a string representing the path segments of a deep link URI. The pattern is broken 
+down into its constituent parts/segments and each part is tested against the corresponding part of 
+the deep link path segments.  
+We take a fast path by immediately returning a NO-MATCH if the size of the pattern segments is not 
+the same as that of the URI path segments.
 
 A route pattern part can be one of the following:
 
 1. **Simple string:**
-This is a static string defined at compile time that must be exactly the same as the corresponding part of the deep link.
+This is a static string defined at compile time that must be exactly the same as the corresponding part 
+   of the deep link.
 
 2. **Wildcard (\*)**:
 This is quite straightforward, as the wildcard always passes unconditionally
 
 3. **Parameterized string**: `:parameterName(REGEX)`  
-Simple regexes are officially supported, however, the library does not attempt any sophisticated logic, hence complex regexes are highly discouraged.  
-The `REGEX` is matched against the entire URI part and if successful, `parameterName` will be stored as a key in the param map, and the corresponding URI part as its value
-  - `(REGEX)` is optional, and omitting it makes the syntax like `:parameterName`. This is basically equivalent to `:parameterName(.*)` and it passes unconditionally, just like the wildcard.  
-  - `parameterName` can be omitted as well in a situation where the regex matching functionality alone is required. The syntax then becomes `:(REGEX)`. Since there is no parameter name, the matched value will not be added to the param map.
+Simple regexes are officially supported, however, the library does not attempt any sophisticated logic, 
+hence complex regexes are highly discouraged.  
+The `REGEX` is matched against the entire URI part and if successful, `parameterName` will be stored as a 
+   key in the param map, and the corresponding URI part as its value
+  - `(REGEX)` is optional, and omitting it makes the syntax like `:parameterName`. This is basically 
+    equivalent to `:parameterName(.*)` and it passes unconditionally, just like the wildcard.  
+  - `parameterName` can be omitted as well in a situation where the regex matching functionality alone is 
+    required. The syntax then becomes `:(REGEX)`. Since there is no parameter name, the matched value will 
+    not be added to the param map.
 
-A Route can be configured such that it treats the host of the input deep link as the first part of the path segments. This can come handy for use with deep links made up of custom schemes and that do not necessarily define an explicit host.
+A Route can be configured such that it treats the host of the input deep link as the first part of the path 
+segments. This can come handy for use with deep links made up of custom schemes and that do not necessarily 
+define an explicit host.
 
 ## Sample Usage
 The most important entry points are the `DeepLinkParser<T>` and `BaseRoute<T>` classes.
@@ -58,14 +76,14 @@ A very simplistic example of a `DeepLinkParser<String>` is given below
 ```kotlin
 object RecipeRoute : BaseRoute<String>("recipes", "recipe/:id") {
 
-    override fun run(uri: DeepLinkUri, params: Map<String, String>, environment: Environment): String {
+    override fun run(uri: DeepLinkUri, params: Map<String, String>, env: Environment): String {
         return params["id"] ?: javaClass.simpleName
     }
 }
 
 object SubscriptionRoute : BaseRoute<String>("subscription") {
 
-    override fun run(uri: DeepLinkUri, params: Map<String, String>, environment: Environment): String {
+    override fun run(uri: DeepLinkUri, params: Map<String, String>, env: Environment): String {
         return javaClass.simpleName
     }
 }
@@ -74,54 +92,39 @@ val parser = DeepLinkParser.of<String>(EmptyEnvironment)
     .addRoute(RecipeRoute)
     .addRoute(SubscriptionRoute)
     .addFallbackAction(object : Action<String> {
-        override fun run(uri: DeepLinkUri, params: Map<String, String>, environment: Environment): String {
+        override fun run(uri: DeepLinkUri, params: Map<String, String>, env: Environment): String {
             return "fallback"
         }
     })
     .build()
 
-val stringResult = parser.parse("http://www.hellofresh.com/recipe/1234")
+val stringResult = parser.parse("http://www.example.com/recipe/1234")
 assertEquals("1234", stringResult)
 ```
 
 ## Installation
 
-To add `android-deeplink` to your project, include the following in your app's `build.gradle.kts` or `build.gradle` file respectively:
+To add `android-deeplink` to your project, include the following in your app's `build.gradle.kts` 
+file respectively:
 
 `build.gradle.kts`
 
 ```
 dependencies {
-    implementation("com.hellofresh.android:deeplink:${latest.version}")
+    implementation("com.kingsleyadio.deeplink:deeplink:${latest.version}")
 }
 ```
 
-`build.gradle`
-
-```
-dependencies {
-    implementation "com.hellofresh.android:deeplink:${latest.version}"
-}
-```
-
-**Snapshots** of the development version are available in JFrog's snapshots repository. Add the repo below to download `SNAPSHOT` releases.
+**Snapshots** of the development version are available in Sonatype's snapshots repository.
+Add the repo below to download `SNAPSHOT` releases.
 
 `build.gradle.kts`
 
 ```
 repositories {
-    maven(url = "http://oss.jfrog.org/artifactory/oss-snapshot-local/")
+    maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
 }
 ```
-
-`build.gradle`
-
-```
-repositories {
-    maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
-}
-```
-
 
 License
 -------
